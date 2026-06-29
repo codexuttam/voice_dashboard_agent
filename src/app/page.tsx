@@ -297,16 +297,7 @@ export default function Home() {
     setPayments([]);
   };
 
-  const handleUseDemoToken = () => {
-    const demoToken = 'dummy-token-for-dev';
-    const demoEmail = 'uttamrajsingh423@gmail.com';
-    setToken(demoToken);
-    setUserEmail(demoEmail);
-    localStorage.setItem('billing_auth_token', demoToken);
-    localStorage.setItem('billing_user_email', demoEmail);
-    setIsLoggedIn(true);
-    setError('');
-  };
+
 
   const handleRecharge = async () => {
     setRecharging(true);
@@ -612,15 +603,49 @@ export default function Home() {
 
           <div className="relative flex items-center justify-center my-6">
             <div className="absolute inset-x-0 h-px bg-slate-800" />
-            <span className="relative bg-slate-900 px-3 text-xs text-slate-500 font-semibold uppercase">Or Development</span>
+            <span className="relative bg-slate-900 px-3 text-xs text-slate-500 font-semibold uppercase">Admin Access</span>
           </div>
 
-          <button
-            onClick={handleUseDemoToken}
-            className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-800 py-3 rounded-lg font-semibold text-sm transition-colors text-slate-300"
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              if (formData.get('adminEmail') === 'bitlanceai@gmail.com' && formData.get('adminPassword') === 'admin123') {
+                const demoToken = 'dummy-token-for-dev';
+                const demoEmail = 'bitlanceai@gmail.com';
+                setToken(demoToken);
+                setUserEmail(demoEmail);
+                localStorage.setItem('billing_auth_token', demoToken);
+                localStorage.setItem('billing_user_email', demoEmail);
+                setIsLoggedIn(true);
+                setError('');
+              } else {
+                setError('Invalid admin credentials');
+              }
+            }}
+            className="space-y-3"
           >
-            Use Local Developer Account
-          </button>
+            <input
+              type="email"
+              name="adminEmail"
+              required
+              placeholder="Admin Email"
+              className="w-full bg-slate-950/80 border border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-colors"
+            />
+            <input
+              type="password"
+              name="adminPassword"
+              required
+              placeholder="Admin Password"
+              className="w-full bg-slate-950/80 border border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-colors"
+            />
+            <button
+              type="submit"
+              className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-800 py-3 rounded-lg font-semibold text-sm transition-colors text-slate-300"
+            >
+              Access Admin Panel
+            </button>
+          </form>
         </div>
       </main>
     );
