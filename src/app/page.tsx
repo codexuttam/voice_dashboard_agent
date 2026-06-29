@@ -89,7 +89,7 @@ export default function Home() {
   // Call Trigger states
   const [showTriggerModal, setShowTriggerModal] = useState<boolean>(false);
   const [triggerPhone, setTriggerPhone] = useState<string>('');
-  const [triggerAgentId, setTriggerAgentId] = useState<string>('45b42390-369b-49b5-9a26-21a099dc843e');
+  const [triggerAgentId, setTriggerAgentId] = useState<string>(process.env.NEXT_PUBLIC_DEFAULT_AGENT_ID || '45b42390-369b-49b5-9a26-21a099dc843e');
   const [triggering, setTriggering] = useState<boolean>(false);
 
   // Toast notifications state
