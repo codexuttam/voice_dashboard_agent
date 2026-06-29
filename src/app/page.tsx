@@ -347,6 +347,27 @@ export default function Home() {
         },
         theme: {
           color: '#3B82F6'
+        },
+        modal: {
+          ondismiss: async function () {
+            console.log('Payment modal closed');
+            try {
+              await fetch(`${BACKEND_URL}/billing/razorpay/fail`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                  order_id: orderData.orderId
+                })
+              });
+              fetchData(token);
+              showToast('Payment cancelled / failed.', 'error');
+            } catch (err) {
+              console.error('Error reporting payment failure:', err);
+            }
+          }
         }
       };
 
