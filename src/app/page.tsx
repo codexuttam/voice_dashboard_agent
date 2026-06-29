@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Info
 } from 'lucide-react';
+import Sidebar from '@/components/Sidebar';
 
 interface Stats {
   creditsRemaining: number;
@@ -111,7 +112,7 @@ export default function Home() {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001/api';
   const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
-  // Load token from localStorage
+  // Restore session persistence for the current logged-in user
   useEffect(() => {
     const savedToken = localStorage.getItem('billing_auth_token');
     const savedEmail = localStorage.getItem('billing_user_email');
@@ -302,6 +303,16 @@ export default function Home() {
   const handleRecharge = async () => {
     setRecharging(true);
     try {
+      if (!(window as any).Razorpay) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.body.appendChild(script);
+        });
+      }
+
       // 1. Create order on backend
       const res = await fetch(`${BACKEND_URL}/billing/razorpay/create-order`, {
         method: 'POST',
@@ -613,10 +624,12 @@ export default function Home() {
               if (formData.get('adminEmail') === 'bitlanceai@gmail.com' && formData.get('adminPassword') === 'admin123') {
                 const demoToken = 'dummy-token-for-dev';
                 const demoEmail = 'bitlanceai@gmail.com';
+                
+                // Do NOT save admin session in localStorage so it doesn't persistently redirect to admin
+                // (or save it if you want, but the user requested standard user session, so I'll only save standard users)
+                // Wait, if they want admin to log in every time but users to stay logged in:
                 setToken(demoToken);
                 setUserEmail(demoEmail);
-                localStorage.setItem('billing_auth_token', demoToken);
-                localStorage.setItem('billing_user_email', demoEmail);
                 setIsLoggedIn(true);
                 setError('');
               } else {
@@ -655,15 +668,16 @@ export default function Home() {
   const displayCredits = stats.creditsRemaining !== undefined ? stats.creditsRemaining : 0;
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10 relative">
-      {/* Background decoration */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
+    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100">
+      <Sidebar />
+      <main className="flex-1 overflow-y-auto p-6 pt-24 md:p-10 relative">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-10 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Load Razorpay SDK */}
-      <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
+        {/* Load Razorpay SDK is now done dynamically */}
 
-      <div className="max-w-7xl mx-auto space-y-8 relative z-10">
+        <div className="max-w-7xl mx-auto space-y-8 relative z-10">
 
         {/* HEADER */}
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-900 pb-6">
@@ -1335,5 +1349,6 @@ export default function Home() {
         ))}
       </div>
     </main>
+  </div>
   );
 }
