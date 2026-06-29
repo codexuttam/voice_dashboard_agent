@@ -1078,10 +1078,10 @@ export default function Home() {
                       <div className="bg-slate-950/40 border border-slate-850 p-4 rounded-xl space-y-3">
                         <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">AI Extracted Information</h4>
                         <div className="space-y-2.5">
-                          {entities.patient_name && (
+                          {(entities.client_name || entities.patient_name) && (
                             <div className="flex justify-between items-center text-xs py-1 border-b border-slate-805/40">
-                              <span className="text-slate-400">Patient Name</span>
-                              <span className="text-slate-200 font-semibold">{entities.patient_name}</span>
+                              <span className="text-slate-400">Client Name</span>
+                              <span className="text-slate-200 font-semibold">{entities.client_name || entities.patient_name}</span>
                             </div>
                           )}
                           {entities.department && (
