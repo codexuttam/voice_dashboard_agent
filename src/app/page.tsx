@@ -90,6 +90,7 @@ export default function Home() {
   const [showTriggerModal, setShowTriggerModal] = useState<boolean>(false);
   const [triggerPhone, setTriggerPhone] = useState<string>('');
   const [triggerAgentId, setTriggerAgentId] = useState<string>(process.env.NEXT_PUBLIC_DEFAULT_AGENT_ID || '45b42390-369b-49b5-9a26-21a099dc843e');
+  const [workflows, setWorkflows] = useState<{ workflow_id: string; workflow_name: string }[]>([]);
   const [triggering, setTriggering] = useState<boolean>(false);
 
   // Toast notifications state
@@ -154,6 +155,21 @@ export default function Home() {
       const paymentsData = await paymentsRes.json();
       if (paymentsData.success) {
         setPayments(paymentsData.payments);
+      }
+
+      // Fetch user workflows
+      try {
+        const workflowsRes = await fetch(`${BACKEND_URL}/billing/workflows`, { headers });
+        const workflowsData = await workflowsRes.json();
+        if (workflowsData.success && workflowsData.workflows) {
+          setWorkflows(workflowsData.workflows);
+          // Auto-select the first workflow if available
+          if (workflowsData.workflows.length > 0) {
+            setTriggerAgentId(workflowsData.workflows[0].workflow_id);
+          }
+        }
+      } catch (wfErr) {
+        console.error('Failed to fetch user workflows:', wfErr);
       }
 
       setError('');
@@ -1150,16 +1166,52 @@ export default function Home() {
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                  Voice Agent UUID
+                  Voice Agent / Workflow
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={triggerAgentId}
-                  onChange={(e) => setTriggerAgentId(e.target.value)}
-                  placeholder="Enter your voice agent UUID"
-                  className="w-full bg-slate-950/80 border border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-colors"
-                />
+                {workflows.length > 0 ? (
+                  <>
+                    <select
+                      value={workflows.some(w => w.workflow_id === triggerAgentId) ? triggerAgentId : 'custom'}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'custom') {
+                          setTriggerAgentId('');
+                        } else {
+                          setTriggerAgentId(val);
+                        }
+                      }}
+                      className="w-full bg-slate-950/80 border border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-3.5 text-sm text-slate-100 focus:outline-none transition-colors mb-3"
+                    >
+                      {workflows.map((wf) => (
+                        <option key={wf.workflow_id} value={wf.workflow_id}>
+                          {wf.workflow_name}
+                        </option>
+                      ))}
+                      <option value="custom">-- Enter Custom Workflow ID --</option>
+                    </select>
+
+                    {/* Show custom input if they selected 'custom' or the ID is not in the list */}
+                    {!workflows.some(w => w.workflow_id === triggerAgentId) && (
+                      <input
+                        type="text"
+                        required
+                        value={triggerAgentId}
+                        onChange={(e) => setTriggerAgentId(e.target.value)}
+                        placeholder="Enter your custom voice agent UUID"
+                        className="w-full bg-slate-950/80 border border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-colors"
+                      />
+                    )}
+                  </>
+                ) : (
+                  <input
+                    type="text"
+                    required
+                    value={triggerAgentId}
+                    onChange={(e) => setTriggerAgentId(e.target.value)}
+                    placeholder="Enter your voice agent UUID"
+                    className="w-full bg-slate-950/80 border border-slate-800 focus:border-blue-500 rounded-lg py-2.5 px-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-colors"
+                  />
+                )}
               </div>
 
               <button
