@@ -49,7 +49,7 @@ export default function VoiceLeadsPage() {
 
         const { data: voiceLeads, error: sbError } = await supabase
           .from("lotlite_leads")
-          .select("id, call_id, call_time, duration_seconds, preferred_language, purpose, full_name, mobile_number, email, property_type, city, locality, budget, size_bhk, amenities, move_in_timeline, recording_url, transcript_url, phone_number")
+          .select("id, call_id, call_time, duration_seconds, preferred_language, purpose, first_name, full_name, mobile_number, email, property_type, city, locality, budget, size_bhk, amenities, move_in_timeline, recording_url, transcript_url, phone_number")
           .order("call_time", { ascending: false });
 
         if (sbError) {

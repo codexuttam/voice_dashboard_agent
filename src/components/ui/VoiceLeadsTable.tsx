@@ -63,6 +63,7 @@ export interface VoiceLead {
   duration_seconds: string | null;
   preferred_language: string | null;
   purpose: string | null;
+  first_name: string | null;
   full_name: string | null;
   mobile_number: string | null;
   email: string | null;
@@ -146,6 +147,7 @@ export default function VoiceLeadsTable({ leads }: { leads: VoiceLead[] }) {
     const matchSearch =
       !q ||
       (l.full_name ?? "").toLowerCase().includes(q) ||
+      (l.first_name ?? "").toLowerCase().includes(q) ||
       (l.phone_number ?? "").toLowerCase().includes(q) ||
       (l.city ?? "").toLowerCase().includes(q) ||
       (l.property_type ?? "").toLowerCase().includes(q);
@@ -219,7 +221,7 @@ export default function VoiceLeadsTable({ leads }: { leads: VoiceLead[] }) {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <div className="font-black text-slate-900 dark:text-slate-100 text-base">
-                  {lead.full_name?.trim() || <span className="text-slate-500 font-normal">No name</span>}
+                  {lead.full_name?.trim() || lead.first_name?.trim() || <span className="text-slate-500 font-normal">No name</span>}
                 </div>
                 <div className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                   <Phone className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
@@ -347,7 +349,7 @@ export default function VoiceLeadsTable({ leads }: { leads: VoiceLead[] }) {
                     {/* Caller */}
                     <td className="px-5 py-4 min-w-[160px]">
                       <div className="font-bold text-slate-950 dark:text-slate-200">
-                        {lead.full_name?.trim() || <span className="text-slate-500 font-normal">No name</span>}
+                        {lead.full_name?.trim() || lead.first_name?.trim() || <span className="text-slate-500 font-normal">No name</span>}
                       </div>
                       <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         <Phone className="w-3 h-3 shrink-0 text-emerald-500" />
