@@ -1831,14 +1831,14 @@ export default function Home() {
                 <input
                   type="number"
                   required
-                  min="100"
+                  min="1"
                   value={rechargeAmount}
                   onChange={(e) => setRechargeAmount(parseInt(e.target.value) || 0)}
                   placeholder="e.g. 1000"
                   className="w-full bg-slate-950/80 border border-slate-800 focus:border-cyan-500 rounded-lg py-2.5 px-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-colors"
                 />
                 <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
-                  Min amount is ₹100. Credits will be automatically synchronized with your main Supabase account upon successful payment.
+                  Min amount is ₹1. Credits will be automatically synchronized with your main Supabase account upon successful payment.
                 </p>
               </div>
 
