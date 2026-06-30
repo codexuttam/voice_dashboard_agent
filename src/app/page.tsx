@@ -105,6 +105,11 @@ export default function Home() {
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>('');
   const [loggingIn, setLoggingIn] = useState<boolean>(false);
+  const [agreedToTerms, setAgreedToTerms] = useState<boolean>(false);
+  const [showTermsModal, setShowTermsModal] = useState<boolean>(false);
+  const [showResendModal, setShowResendModal] = useState<boolean>(false);
+  const [resendEmailAddress, setResendEmailAddress] = useState<string>('');
+  const [sendingResend, setSendingResend] = useState<boolean>(false);
   const [stats, setStats] = useState<Stats>({
     creditsRemaining: 0,
     todayCalls: 0,
@@ -405,6 +410,36 @@ export default function Home() {
     }
   };
 
+  const handleResendVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resendEmailAddress.trim()) {
+      showToast('Please enter your email address', 'error');
+      return;
+    }
+    setSendingResend(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/auth/resend-verification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: resendEmailAddress })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || 'Verification email resent!', 'success');
+        setShowResendModal(false);
+        setResendEmailAddress('');
+      } else {
+        showToast(data.error || 'Failed to resend verification email', 'error');
+      }
+    } catch (err: any) {
+      showToast('Error: ' + err.message, 'error');
+    } finally {
+      setSendingResend(false);
+    }
+  };
+
   const handleLogout = () => {
     sessionStorage.removeItem('billing_auth_token');
     sessionStorage.removeItem('billing_user_email');
@@ -662,12 +697,10 @@ export default function Home() {
     } finally {
       setTriggering(false);
     }
-  };
-
-  // Render Login Screen if not logged in
+  };  // Render Login Screen if not logged in
   if (!isLoggedIn) {
     return (
-      <main className="min-h-screen bg-slate-50 dark:bg-slate-955 text-slate-900 dark:text-slate-100 flex items-center justify-center p-4 relative transition-colors duration-300">
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex items-center justify-center p-4 relative transition-colors duration-300">
         {/* Background Gradients */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-500/10 dark:from-blue-900/20 via-slate-50 dark:via-slate-950 to-slate-50 dark:to-slate-950 pointer-events-none transition-colors duration-300" />
 
@@ -782,26 +815,262 @@ export default function Home() {
               </div>
             )}
 
+            {isSignUp && (
+              <div className="flex items-start gap-2.5 mt-2">
+                <input
+                  type="checkbox"
+                  id="agree-terms"
+                  required
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-1 w-4 h-4 text-cyan-600 border-slate-300 dark:border-slate-800 rounded focus:ring-cyan-500 cursor-pointer"
+                />
+                <label htmlFor="agree-terms" className="text-xs text-slate-500 dark:text-slate-400 leading-normal select-none cursor-pointer">
+                  I agree to the{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-cyan-600 dark:text-cyan-400 hover:underline font-semibold"
+                  >
+                    Terms and Conditions of Service
+                  </button>
+                </label>
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={loggingIn}
+              disabled={loggingIn || (isSignUp && !agreedToTerms)}
               className="w-full bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 disabled:opacity-50 py-3 rounded-lg font-semibold text-sm transition-colors shadow-lg shadow-cyan-500/20 text-white"
             >
               {loggingIn ? (isSignUp ? 'Signing Up...' : 'Signing In...') : (isSignUp ? 'Sign Up' : 'Sign In to Dashboard')}
             </button>
           </form>
 
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-semibold"
-            >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-            </button>
+          <div className="mt-4 text-center space-y-2">
+            <div>
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-semibold"
+              >
+                {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+              </button>
+            </div>
+            {!isSignUp && (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowResendModal(true)}
+                  className="text-[11px] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 font-medium transition-colors"
+                >
+                  Didn't receive verification email? Resend
+                </button>
+              </div>
+            )}
           </div>
 
         </div>
+
+        {/* TERMS AND CONDITIONS MODAL */}
+        {showTermsModal && (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl relative transition-all duration-300">
+              <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                <div className="flex items-center gap-3">
+                  <img src="/logo.jpg" alt="Logo" className="h-8 w-auto rounded-lg object-contain dark:invert dark:hue-rotate-180 transition-all duration-300" />
+                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Terms of Service</h3>
+                </div>
+                <button
+                  onClick={() => setShowTermsModal(false)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-250 text-sm font-semibold transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto space-y-4 text-xs text-slate-650 dark:text-slate-400 leading-relaxed font-sans scrollbar-thin">
+                <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 uppercase tracking-wide">
+                  BITLANCE VOICE AI AGENT — Terms and Conditions of Service
+                </h4>
+                <p>
+                  Please read these Terms and Conditions carefully before signing up for or using our Voice AI Agent Service. By creating an account or using the Service, you agree to be bound by these Terms. If you do not agree, do not use the Service.
+                </p>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">1. Definitions</h5>
+                <div className="pl-2">
+                  <strong>"Service"</strong> means the Voice AI Agent platform, including all voice interaction capabilities, APIs, dashboards, and related tools provided by us.
+                  <br />
+                  <strong>"User"</strong> or <strong>"You"</strong> means any individual or entity that registers for or uses the Service.
+                  <br />
+                  <strong>"We," "Us,"</strong> or <strong>"Company"</strong> refers to the operator of the Voice AI Agent platform.
+                  <br />
+                  <strong>"Voice Data"</strong> means audio inputs, transcripts, and interaction logs generated during your use of the Service.
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">2. Eligibility & Account Registration</h5>
+                <div className="pl-2">
+                  To use the Service, you must:
+                  <ul className="list-disc pl-5 space-y-1 mt-1">
+                    <li>Be at least 18 years of age or the age of legal majority in your jurisdiction.</li>
+                    <li>Provide accurate, complete, and current registration information.</li>
+                    <li>Maintain the security of your account credentials.</li>
+                    <li>Notify us immediately of any unauthorized access or breach of your account.</li>
+                  </ul>
+                  You are solely responsible for all activity that occurs under your account.
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">3. Use of the Voice AI Agent</h5>
+                <div className="pl-2">
+                  <strong>3.1 Permitted Use</strong>
+                  <br />
+                  The Service may only be used for lawful purposes and in accordance with these Terms. You agree to use the Service in a manner consistent with all applicable local, state, national, and international laws and regulations.
+                  <br />
+                  <strong>3.2 Prohibited Use</strong>
+                  <br />
+                  You must not use the Service to:
+                  <ul className="list-disc pl-5 space-y-1 mt-1">
+                    <li>Impersonate any person or entity, or falsely represent your affiliation with any person or entity.</li>
+                    <li>Collect or harvest personal data of others without consent.</li>
+                    <li>Transmit spam, unsolicited communications, or automated scripts not authorized by us.</li>
+                    <li>Engage in fraudulent, abusive, or harmful interactions via voice prompts.</li>
+                    <li>Attempt to reverse-engineer, decompile, or disassemble any component of the Service.</li>
+                    <li>Use the Service to generate or distribute illegal, defamatory, or harmful content.</li>
+                  </ul>
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">4. Voice Data & Privacy</h5>
+                <div className="pl-2">
+                  By using the Service, you acknowledge and agree that:
+                  <ul className="list-disc pl-5 space-y-1 mt-1">
+                    <li>Voice interactions may be recorded, processed, and stored to provide, improve, and personalize the Service.</li>
+                    <li>Transcripts and metadata from interactions may be analyzed by automated systems and, in limited cases, reviewed by authorized personnel for quality assurance.</li>
+                    <li>You will not transmit sensitive personal information (e.g., passwords, financial account numbers, health data) through voice interactions unless explicitly supported and secured by the platform.</li>
+                  </ul>
+                  Your use of Voice Data is governed by our Privacy Policy, which is incorporated into these Terms by reference.
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">5. Consent to Voice Recording</h5>
+                <div className="pl-2">
+                  Where applicable law requires consent before recording voice conversations, you hereby provide consent on behalf of yourself and agree to obtain consent from any third parties whose voice may be captured during your use of the Service. You are responsible for compliance with all applicable recording consent laws in your jurisdiction.
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">6. Intellectual Property</h5>
+                <div className="pl-2">
+                  <strong>6.1 Our IP</strong>
+                  <br />
+                  All content, features, software, and technology underlying the Service are the exclusive property of the Company or its licensors. These Terms do not grant you any rights to use our trademarks, logos, or proprietary technology.
+                  <br />
+                  <strong>6.2 Your Content</strong>
+                  <br />
+                  You retain ownership of any content you provide through the Service. By using the Service, you grant the Company a non-exclusive, worldwide, royalty-free license to use, process, and store your content solely for the purpose of providing and improving the Service.
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">7. Payment & Subscription</h5>
+                <div className="pl-2">
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Access to certain features may require a paid subscription. All fees are stated at the time of purchase.</li>
+                    <li>Subscriptions automatically renew unless cancelled before the renewal date.</li>
+                    <li>All payments are non-refundable unless otherwise stated or required by applicable law.</li>
+                    <li>We reserve the right to modify pricing with 30 days' advance notice.</li>
+                  </ul>
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">8. Disclaimer of Warranties</h5>
+                <div className="pl-2">
+                  THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR FREE OF HARMFUL COMPONENTS. YOUR USE OF THE SERVICE IS AT YOUR SOLE RISK.
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">9. Limitation of Liability</h5>
+                <div className="pl-2">
+                  TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE COMPANY SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF DATA, REVENUE, OR GOODWILL, ARISING FROM YOUR USE OF OR INABILITY TO USE THE SERVICE.
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">10. Termination</h5>
+                <div className="pl-2">
+                  We reserve the right to suspend or terminate your account at any time, with or without notice, if you violate these Terms or engage in conduct harmful to the Service or other users. Upon termination, your right to use the Service ceases immediately.
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">11. Governing Law & Dispute Resolution</h5>
+                <div className="pl-2">
+                  These Terms shall be governed by and construed in accordance with the laws of the applicable jurisdiction. Any disputes arising under these Terms shall be resolved through binding arbitration or in the courts of the applicable jurisdiction, as agreed upon at the time of signup.
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">12. Changes to These Terms</h5>
+                <div className="pl-2">
+                  We may update these Terms from time to time. We will notify you of material changes via email or in-app notice. Continued use of the Service after the effective date of any update constitutes acceptance of the revised Terms.
+                </div>
+
+                <h5 className="font-bold text-slate-900 dark:text-slate-100 mt-3">13. Contact Us</h5>
+                <div className="pl-2 space-y-1">
+                  <p><strong>Bitlance Voice AI Agent — Legal Team</strong></p>
+                  <p>Email: <a href="mailto:ceo@bitlancetechhub.com" className="text-cyan-600 dark:text-cyan-400">ceo@bitlancetechhub.com</a></p>
+                  <p>Website: <a href="https://www.bitlancetechub.com" target="_blank" rel="noopener noreferrer" className="text-cyan-600 dark:text-cyan-400">www.bitlancetechub.com</a></p>
+                </div>
+
+                <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2">
+                  <img src="/logo.jpg" alt="Logo" className="h-10 w-auto rounded-lg object-contain dark:invert dark:hue-rotate-180 transition-all duration-300" />
+                  <p className="text-[10px] text-slate-400">© 2026 Bitlance Voice AI Agent. All Rights Reserved.</p>
+                </div>
+              </div>
+
+              <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setAgreedToTerms(true);
+                    setShowTermsModal(false);
+                  }}
+                  className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors"
+                >
+                  I Agree to Terms
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* RESEND VERIFICATION MODAL */}
+        {showResendModal && (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative transition-all duration-300">
+              <form onSubmit={handleResendVerification} className="p-6 space-y-4">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Resend Verification Email</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Enter your email address below, and we will trigger a new verification link to your inbox.
+                </p>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={resendEmailAddress}
+                    onChange={(e) => setResendEmailAddress(e.target.value)}
+                    placeholder="name@example.com"
+                    className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 focus:border-cyan-500 rounded-lg py-2.5 px-4 text-sm text-slate-850 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-colors"
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowResendModal(false)}
+                    className="px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={sendingResend}
+                    className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    {sendingResend ? 'Sending...' : 'Send Link'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
     );
   }
