@@ -704,7 +704,7 @@ export default function Home() {
         {/* Background Gradients */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-500/10 dark:from-blue-900/20 via-slate-50 dark:via-slate-950 to-slate-50 dark:to-slate-950 pointer-events-none transition-colors duration-300" />
 
-        <div className="w-full max-w-md bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-8 rounded-2xl shadow-2xl relative z-10 transition-colors duration-300">
+        <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 p-8 rounded-2xl shadow-2xl relative z-10 transition-colors duration-300">
           {/* Theme Toggle Button */}
           <button
             onClick={togglePageTheme}
@@ -716,7 +716,7 @@ export default function Home() {
           </button>
 
           <div className="flex flex-col items-center mb-8">
-            <img src="/logo.jpg" alt="Logo" className="h-16 w-auto rounded-xl object-contain mb-4 dark:invert dark:hue-rotate-180 transition-all duration-300" />
+            <img src="/logo.jpg" alt="Logo" className="h-16 w-auto rounded-xl object-contain mb-4 mix-blend-multiply dark:invert dark:hue-rotate-180 dark:mix-blend-screen transition-all duration-300" />
             <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Single-Client Billing Dashboard</p>
           </div>
 
@@ -878,7 +878,7 @@ export default function Home() {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl relative transition-all duration-300">
               <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
                 <div className="flex items-center gap-3">
-                  <img src="/logo.jpg" alt="Logo" className="h-8 w-auto rounded-lg object-contain dark:invert dark:hue-rotate-180 transition-all duration-300" />
+                  <img src="/logo.jpg" alt="Logo" className="h-8 w-auto rounded-lg object-contain mix-blend-multiply dark:invert dark:hue-rotate-180 dark:mix-blend-screen transition-all duration-300" />
                   <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Terms of Service</h3>
                 </div>
                 <button
@@ -1009,7 +1009,7 @@ export default function Home() {
                 </div>
 
                 <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col items-center gap-2">
-                  <img src="/logo.jpg" alt="Logo" className="h-10 w-auto rounded-lg object-contain dark:invert dark:hue-rotate-180 transition-all duration-300" />
+                  <img src="/logo.jpg" alt="Logo" className="h-10 w-auto rounded-lg object-contain mix-blend-multiply dark:invert dark:hue-rotate-180 dark:mix-blend-screen transition-all duration-300" />
                   <p className="text-[10px] text-slate-400">© 2026 Bitlance Voice AI Agent. All Rights Reserved.</p>
                 </div>
               </div>

@@ -50,7 +50,7 @@ export default function Sidebar() {
       {/* Mobile Top Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-900 flex items-center justify-between px-4 z-40">
         <Link href="/" className="flex items-center">
-          <img src="/logo.jpg" alt="Logo" className="h-8 w-auto rounded-lg object-contain dark:invert dark:hue-rotate-180" />
+          <img src="/logo.jpg" alt="Logo" className="h-8 w-auto rounded-lg object-contain mix-blend-multiply dark:invert dark:hue-rotate-180 dark:mix-blend-screen" />
         </Link>
         <button onClick={toggleSidebar} className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 focus:outline-none">
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -71,7 +71,7 @@ export default function Sidebar() {
       }`}>
       <div className="p-6 border-b border-slate-200 dark:border-slate-900 flex items-center justify-between md:block">
         <Link href="/" className="flex items-center">
-          <img src="/logo.jpg" alt="Logo" className="h-9 w-auto rounded-lg object-contain dark:invert dark:hue-rotate-180" />
+          <img src="/logo.jpg" alt="Logo" className="h-9 w-auto rounded-lg object-contain mix-blend-multiply dark:invert dark:hue-rotate-180 dark:mix-blend-screen" />
         </Link>
         <button onClick={toggleSidebar} className="md:hidden p-1 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100">
           <X className="w-5 h-5" />
