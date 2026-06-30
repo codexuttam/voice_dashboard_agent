@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Voice Dashboard",
   description: "Manage your voice leads and dashboard",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
