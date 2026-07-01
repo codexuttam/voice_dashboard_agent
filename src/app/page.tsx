@@ -21,7 +21,8 @@ import {
   Sun,
   Moon,
   Eye,
-  EyeOff
+  EyeOff,
+  X
 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import Logo from '@/components/Logo';
@@ -115,6 +116,10 @@ export default function Home() {
   const [resendEmailAddress, setResendEmailAddress] = useState<string>('');
   const [sendingResend, setSendingResend] = useState<boolean>(false);
   const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
+
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState<boolean>(false);
+  const [forgotEmail, setForgotEmail] = useState<string>('');
+  const [sendingForgot, setSendingForgot] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [stats, setStats] = useState<Stats>({
@@ -419,6 +424,35 @@ export default function Home() {
     } finally {
       setLoggingIn(false);
     }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail.trim()) {
+      showToast('Please enter your email address', 'error');
+      return;
+    }
+    setSendingForgot(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: forgotEmail.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('If your account exists, a reset link will be sent to your email.', 'success');
+        setShowForgotPasswordModal(false);
+        setForgotEmail('');
+      } else {
+        showToast(data.error || 'Failed to request password reset', 'error');
+      }
+    } catch (err: any) {
+      showToast('Network error while requesting reset link', 'error');
+    }
+    setSendingForgot(false);
   };
 
   const handleResendVerification = async (e: React.FormEvent) => {
@@ -821,6 +855,18 @@ export default function Home() {
                 </button>
               </div>
             </div>
+
+            {!isSignUp && (
+              <div className="flex justify-end mt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPasswordModal(true)}
+                  className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            )}
 
             {isSignUp && (
               <div>
@@ -1896,6 +1942,54 @@ export default function Home() {
                 Recharge
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* FORGOT PASSWORD MODAL */}
+      {showForgotPasswordModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800/60">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Forgot Password</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  Enter your email to receive a password reset link.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowForgotPasswordModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors bg-slate-50 dark:bg-slate-800 p-2 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleForgotPassword} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 focus:border-cyan-500 rounded-lg py-3 px-4 text-sm text-slate-850 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={sendingForgot || !forgotEmail}
+                  className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:bg-cyan-800 py-3 rounded-lg font-semibold text-sm transition-colors shadow-lg shadow-cyan-500/20 text-white flex items-center justify-center"
+                >
+                  {sendingForgot ? 'Sending Link...' : 'Send Verification Link'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
