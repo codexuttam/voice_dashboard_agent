@@ -355,19 +355,7 @@ export default function Home() {
       return;
     }
 
-    // Custom credential check for itm.lotlite@gmail.com
-    if (!isSignUp && email.trim().toLowerCase() === 'itm.lotlite@gmail.com' && password === 'admin123') {
-      setLoggingIn(true);
-      const demoToken = 'dummy-token-for-dev';
-      sessionStorage.setItem('billing_auth_token', demoToken);
-      sessionStorage.setItem('billing_user_email', 'itm.lotlite@gmail.com');
-      setToken(demoToken);
-      setUserEmail('itm.lotlite@gmail.com');
-      setIsLoggedIn(true);
-      setError('');
-      setLoggingIn(false);
-      return;
-    }
+
     if (isSignUp) {
       if (!name.trim()) {
         setError('Name is required for sign up');
