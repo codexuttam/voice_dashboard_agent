@@ -167,6 +167,19 @@ export default function Home() {
 
   // Restore session persistence for the current logged-in user
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ssoToken = params.get('sso_token');
+    const ssoEmail = params.get('email');
+    
+    if (ssoToken && ssoEmail) {
+      sessionStorage.setItem('billing_auth_token', ssoToken);
+      sessionStorage.setItem('billing_user_email', ssoEmail);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Trigger a storage event manually so Sidebar updates immediately
+      window.dispatchEvent(new Event('storage'));
+    }
+
     const savedToken = sessionStorage.getItem('billing_auth_token');
     const savedEmail = sessionStorage.getItem('billing_user_email');
     if (savedToken) {
